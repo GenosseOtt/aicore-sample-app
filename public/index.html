@@ -110,9 +110,25 @@
     }
 
     #send-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #0070f3;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
       align-self: flex-end;
+      margin-bottom: 2px;
+      transition: background 0.15s, transform 0.1s;
     }
+    #send-btn:hover:not(:disabled) { background: #0058c4; }
+    #send-btn:active:not(:disabled) { transform: scale(0.92); }
+    #send-btn:disabled { background: #c8c8c8; cursor: not-allowed; }
+    #send-btn svg { width: 17px; height: 17px; }
 
     .typing-indicator .bubble {
       display: flex;
@@ -147,7 +163,12 @@
       placeholder="Ask something…"
       rows="1"
     ></textarea>
-    <ui5-button id="send-btn" design="Emphasized" icon="send">Send</ui5-button>
+    <button id="send-btn" aria-label="Send">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
   </div>
 </div>
 
