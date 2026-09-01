@@ -1,0 +1,38 @@
+apiVersion: account.btp.sap.crossplane.io/v1alpha1
+kind: Entitlement
+metadata:
+  name: ott-kymaruntime-aws
+spec:
+  forProvider:
+    serviceName: kymaruntime
+    servicePlanName: aws
+    amount: 1
+    subaccountRef:
+      name: ott
+  providerConfigRef:
+    name: account-provider-config
+---
+apiVersion: environment.btp.sap.crossplane.io/v1alpha1
+kind: KymaEnvironment
+metadata:
+  name: ott-kyma
+spec:
+  subaccountRef:
+    name: ott
+  cloudManagementRef:
+    name: ott-cloud-management
+  writeConnectionSecretToRef:
+    name: kyma-kubeconfig-local
+    namespace: default
+  forProvider:
+    name: ott-kyma
+    planName: aws
+    parameters:
+      region: eu-central-1
+      machineType: m5.xlarge
+      autoScalerMin: 3
+      autoScalerMax: 4
+      administrators:
+        - johannes.ott@sap.com
+  providerConfigRef:
+    name: account-provider-config

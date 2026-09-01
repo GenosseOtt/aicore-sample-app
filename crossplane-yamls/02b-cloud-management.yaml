@@ -1,0 +1,21 @@
+# CloudManagement provisions a CIS local service instance in the subaccount
+# and writes its credentials to ott-cis-local-secret.
+# Required by KymaEnvironment (and any other environment provider) to manage
+# subaccount-level environments.
+# Depends on: ott-service-manager (02-service-manager.yaml) being Ready.
+apiVersion: account.btp.sap.crossplane.io/v1alpha1
+kind: CloudManagement
+metadata:
+  name: ott-cloud-management
+spec:
+  writeConnectionSecretToRef:
+    name: ott-cis-local-secret
+    namespace: crossplane-system
+  forProvider:
+    serviceManagerRef:
+      name: ott-service-manager
+    serviceManagerSecretNamespace: crossplane-system
+    subaccountRef:
+      name: ott
+  providerConfigRef:
+    name: account-provider-config

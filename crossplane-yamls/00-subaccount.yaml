@@ -1,0 +1,14 @@
+apiVersion: account.btp.sap.crossplane.io/v1alpha1
+kind: Subaccount
+metadata:
+  name: ott
+spec:
+  forProvider:
+    displayName: ott
+    subdomain: ott
+    region: eu10
+    description: Demo subaccount for HANA sample app
+    subaccountAdmins:
+      - johannes.ott@sap.com
+  providerConfigRef:
+    name: account-provider-config

@@ -1,0 +1,36 @@
+# Provisions the AI Core service instance and a binding.
+# The ServiceBinding writes credentials to ott-aicore-credentials in
+# crossplane-system. Use the key `attribute.credentials` which holds the
+# full JSON blob (clientid, clientsecret, url, serviceurls.AI_API_URL).
+apiVersion: account.btp.sap.crossplane.io/v1alpha1
+kind: ServiceInstance
+metadata:
+  name: ott-aicore-instance
+spec:
+  forProvider:
+    name: ott-aicore-instance
+    offeringName: aicore
+    planName: extended
+    serviceManagerRef:
+      name: ott-service-manager
+    subaccountRef:
+      name: ott
+  providerConfigRef:
+    name: account-provider-config
+---
+apiVersion: account.btp.sap.crossplane.io/v1alpha1
+kind: ServiceBinding
+metadata:
+  name: ott-aicore-binding
+spec:
+  writeConnectionSecretToRef:
+    name: ott-aicore-credentials
+    namespace: crossplane-system
+  forProvider:
+    name: ott-aicore-binding
+    serviceInstanceRef:
+      name: ott-aicore-instance
+    subaccountRef:
+      name: ott
+  providerConfigRef:
+    name: account-provider-config

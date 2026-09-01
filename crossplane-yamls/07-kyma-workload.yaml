@@ -1,0 +1,113 @@
+# Deploys the AI Core demo app to the Kyma cluster via provider-kubernetes.
+# Depends on:
+#   - ott-kyma-kubernetes ProviderConfig (06-kyma-secret-sync.yaml Ready)
+#   - aicore-credentials Secret in Kyma (06-kyma-secret-sync.yaml Step 3)
+#   - aicore-config ConfigMap in Kyma   (06-kyma-secret-sync.yaml Step 4)
+#
+# Set IMAGE to the ghcr.io image built by the CI pipeline:
+#   ghcr.io/<your-github-org>/hana-sample-app:latest
+# Make the package public in GitHub so Kyma can pull without imagePullSecrets.
+---
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: aicore-demo-deployment
+spec:
+  forProvider:
+    manifest:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: aicore-demo
+        namespace: default
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: aicore-demo
+        template:
+          metadata:
+            labels:
+              app: aicore-demo
+          spec:
+            containers:
+              - name: app
+                image: ghcr.io/<GITHUB_ORG>/hana-sample-app:latest
+                ports:
+                  - containerPort: 3000
+                env:
+                  - name: PORT
+                    value: "3000"
+                  - name: AICORE_RESOURCE_GROUP
+                    value: "default"
+                  - name: AICORE_CREDENTIALS
+                    valueFrom:
+                      secretKeyRef:
+                        name: aicore-credentials
+                        key: attribute.credentials
+                  - name: AICORE_DEPLOYMENT_URL
+                    valueFrom:
+                      configMapKeyRef:
+                        name: aicore-config
+                        key: AICORE_DEPLOYMENT_URL
+                readinessProbe:
+                  httpGet:
+                    path: /
+                    port: 3000
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+  providerConfigRef:
+    name: ott-kyma-kubernetes
+---
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: aicore-demo-service
+spec:
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: aicore-demo
+        namespace: default
+      spec:
+        selector:
+          app: aicore-demo
+        ports:
+          - port: 3000
+            targetPort: 3000
+  providerConfigRef:
+    name: ott-kyma-kubernetes
+---
+# APIRule exposes the app publicly via Kyma API Gateway.
+# The app will be reachable at: https://aicore-demo.<kyma-cluster-domain>
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: aicore-demo-apirule
+spec:
+  forProvider:
+    manifest:
+      apiVersion: gateway.kyma-project.io/v2beta1
+      kind: APIRule
+      metadata:
+        name: aicore-demo
+        namespace: default
+      spec:
+        hosts:
+          - aicore-demo
+        service:
+          name: aicore-demo
+          namespace: default
+          port: 3000
+        gateway: kyma-system/kyma-gateway
+        rules:
+          - path: /.*
+            methods:
+              - GET
+              - POST
+              - OPTIONS
+            noAuth: true
+  providerConfigRef:
+    name: ott-kyma-kubernetes

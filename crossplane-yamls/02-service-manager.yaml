@@ -1,0 +1,13 @@
+apiVersion: account.btp.sap.crossplane.io/v1beta1
+kind: ServiceManager
+metadata:
+  name: ott-service-manager
+spec:
+  writeConnectionSecretToRef:
+    name: ott-service-manager-secret
+    namespace: crossplane-system
+  forProvider:
+    subaccountRef:
+      name: ott
+  providerConfigRef:
+    name: account-provider-config

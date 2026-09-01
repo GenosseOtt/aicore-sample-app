@@ -1,0 +1,27 @@
+apiVersion: account.btp.sap.crossplane.io/v1alpha1
+kind: Entitlement
+metadata:
+  name: ott-cis-local
+spec:
+  forProvider:
+    serviceName: cis
+    servicePlanName: local
+    enable: true
+    subaccountRef:
+      name: ott
+  providerConfigRef:
+    name: account-provider-config
+---
+apiVersion: account.btp.sap.crossplane.io/v1alpha1
+kind: Entitlement
+metadata:
+  name: ott-aicore
+spec:
+  forProvider:
+    serviceName: aicore
+    servicePlanName: extended
+    enable: true
+    subaccountRef:
+      name: ott
+  providerConfigRef:
+    name: account-provider-config

@@ -1,0 +1,46 @@
+# AI Core provider resources: ProviderConfig → Configuration → Deployment.
+#
+# The BTP ServiceBinding (03-aicore-instance.yaml) writes the full service-key JSON
+# as a single value under the key "attribute.credentials" in ott-aicore-credentials.
+# The ProviderConfig references that key directly — no extra transformation needed.
+apiVersion: aicore.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: aicore-provider-config
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: ott-aicore-credentials
+      key: attribute.credentials
+  resourceGroup: default
+---
+# Configuration: foundation-models scenario, GPT-4o via Azure OpenAI.
+apiVersion: aicore.crossplane.io/v1alpha1
+kind: Configuration
+metadata:
+  name: ott-aicore-config
+spec:
+  forProvider:
+    name: ott-aicore-config
+    scenarioId: foundation-models
+    executableId: azure-openai
+    parameterBindings:
+      - key: modelName
+        value: gpt-4o
+      - key: modelVersion
+        value: "0513"
+  providerConfigRef:
+    name: aicore-provider-config
+---
+apiVersion: aicore.crossplane.io/v1alpha1
+kind: Deployment
+metadata:
+  name: ott-aicore-deployment
+spec:
+  forProvider:
+    configurationRef:
+      name: ott-aicore-config
+  providerConfigRef:
+    name: aicore-provider-config
