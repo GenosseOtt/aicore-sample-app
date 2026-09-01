@@ -130,7 +130,22 @@
     #send-btn:disabled { background: #c8c8c8; cursor: not-allowed; }
     #send-btn svg { width: 17px; height: 17px; }
 
-    .typing-indicator .bubble {
+    #empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: #8c9299;
+      user-select: none;
+      pointer-events: none;
+    }
+    #empty-state svg { opacity: 0.25; }
+    #empty-state p { font-size: 0.95rem; }
+    #empty-state.hidden { display: none; }
+
+
       display: flex;
       gap: 4px;
       align-items: center;
@@ -155,7 +170,14 @@
 <ui5-shellbar primary-title="SAP AI Core Demo" secondary-title="GPT-4o via Generative AI Hub"></ui5-shellbar>
 
 <div id="chat-container">
-  <div id="messages"></div>
+  <div id="messages">
+    <div id="empty-state">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#0070f3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <p>Ask anything — powered by GPT-4o via SAP AI Core</p>
+    </div>
+  </div>
 
   <div id="input-row">
     <textarea
@@ -176,12 +198,14 @@
   const messagesEl = document.getElementById('messages');
   const inputEl = document.getElementById('prompt-input');
   const sendBtn = document.getElementById('send-btn');
+  const emptyState = document.getElementById('empty-state');
 
   const history = [
     { role: 'system', content: 'You are a helpful AI assistant.' }
   ];
 
   function appendMessage(role, text) {
+    emptyState.classList.add('hidden');
     const wrapper = document.createElement('div');
     wrapper.className = `message ${role}`;
 
