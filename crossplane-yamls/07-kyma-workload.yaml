@@ -8,6 +8,25 @@
 #   ghcr.io/<your-github-org>/hana-sample-app:latest
 # Make the package public in GitHub so Kyma can pull without imagePullSecrets.
 ---
+# Label the default namespace for Istio sidecar injection.
+# deletionPolicy: Orphan prevents Crossplane from deleting the namespace itself.
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: aicore-demo-namespace
+spec:
+  deletionPolicy: Orphan
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: default
+        labels:
+          istio-injection: enabled
+  providerConfigRef:
+    name: ott-kyma-kubernetes
+---
 apiVersion: kubernetes.crossplane.io/v1alpha2
 kind: Object
 metadata:
@@ -29,10 +48,14 @@ spec:
           metadata:
             labels:
               app: aicore-demo
+            annotations:
+              sidecar.istio.io/inject: "true"
+              kubectl.kubernetes.io/restartedAt: "2026-09-01T18:00:00Z"
           spec:
             containers:
               - name: app
-                image: ghcr.io/<GITHUB_ORG>/hana-sample-app:latest
+
+                image: ghcr.io/genosseott/aicore-sample-app:latest
                 ports:
                   - containerPort: 3000
                 env:
@@ -89,7 +112,7 @@ metadata:
 spec:
   forProvider:
     manifest:
-      apiVersion: gateway.kyma-project.io/v2beta1
+      apiVersion: gateway.kyma-project.io/v2
       kind: APIRule
       metadata:
         name: aicore-demo
@@ -103,7 +126,7 @@ spec:
           port: 3000
         gateway: kyma-system/kyma-gateway
         rules:
-          - path: /.*
+          - path: /*
             methods:
               - GET
               - POST
