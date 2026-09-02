@@ -4,14 +4,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SAP AI Core Demo</title>
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@ui5/webcomponents@2/dist/bundle.esm.js"></script>
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@ui5/webcomponents-fiori@2/dist/bundle.esm.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--sapFontFamily, "72", Arial, sans-serif); background: #f5f6fa; height: 100vh; display: flex; flex-direction: column; }
+    body { font-family: "72", "72full", Arial, Helvetica, sans-serif; background: #f5f6fa; height: 100vh; display: flex; flex-direction: column; }
 
-    ui5-shellbar { flex-shrink: 0; }
+    /* ── Shellbar ─────────────────────────────────────────────────────────── */
+    #shellbar {
+      background: #1d2d3e;
+      color: #fff;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 0;
+      flex-shrink: 0;
+    }
+    #shellbar-logo { width: 28px; height: 28px; flex-shrink: 0; filter: brightness(0) invert(1); }
+    #shellbar-divider {
+      width: 1px;
+      height: 22px;
+      background: rgba(255,255,255,0.25);
+      margin: 0 0.75rem;
+      flex-shrink: 0;
+    }
+    #shellbar-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #shellbar-subtitle {
+      font-size: 0.75rem;
+      opacity: 0.6;
+      margin-left: 0.5rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
 
+    /* ── Chat layout ─────────────────────────────────────────────────────── */
     #chat-container {
       flex: 1;
       display: flex;
@@ -33,12 +64,7 @@
       padding: 0.5rem 0;
     }
 
-    .message {
-      display: flex;
-      gap: 0.75rem;
-      align-items: flex-start;
-    }
-
+    .message { display: flex; gap: 0.75rem; align-items: flex-start; }
     .message.user { flex-direction: row-reverse; }
 
     .bubble {
@@ -50,42 +76,20 @@
       word-break: break-word;
       font-size: 0.9rem;
     }
-
-    .message.user .bubble {
-      background: #0070f3;
-      color: #fff;
-      border-bottom-right-radius: 2px;
-    }
-
-    .message.assistant .bubble {
-      background: #fff;
-      color: #1d2d3e;
-      border: 1px solid #d9d9d9;
-      border-bottom-left-radius: 2px;
-    }
-
-    .message.error .bubble {
-      background: #ffd7d7;
-      color: #bb0000;
-      border: 1px solid #ffaaaa;
-    }
+    .message.user .bubble    { background: #0070f3; color: #fff; border-bottom-right-radius: 2px; }
+    .message.assistant .bubble { background: #fff; color: #1d2d3e; border: 1px solid #d9d9d9; border-bottom-left-radius: 2px; }
+    .message.error .bubble   { background: #ffd7d7; color: #bb0000; border: 1px solid #ffaaaa; }
 
     .avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      font-weight: bold;
-      flex-shrink: 0;
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: bold; flex-shrink: 0;
     }
-
-    .message.user .avatar { background: #0070f3; color: #fff; }
+    .message.user .avatar      { background: #0070f3; color: #fff; }
     .message.assistant .avatar { background: #f0ab00; color: #fff; }
-    .message.error .avatar { background: #bb0000; color: #fff; }
+    .message.error .avatar     { background: #bb0000; color: #fff; }
 
+    /* ── Input row ───────────────────────────────────────────────────────── */
     #input-row {
       display: flex;
       gap: 0.5rem;
@@ -97,32 +101,16 @@
     }
 
     #prompt-input {
-      flex: 1;
-      resize: none;
-      border: none;
-      outline: none;
-      font-size: 0.9rem;
-      font-family: inherit;
-      padding: 0.5rem;
-      max-height: 160px;
-      min-height: 44px;
-      line-height: 1.5;
+      flex: 1; resize: none; border: none; outline: none;
+      font-size: 0.9rem; font-family: inherit;
+      padding: 0.5rem; max-height: 160px; min-height: 44px; line-height: 1.5;
     }
 
     #send-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: none;
-      background: #0070f3;
-      color: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      align-self: flex-end;
-      margin-bottom: 2px;
+      width: 40px; height: 40px; border-radius: 50%; border: none;
+      background: #0070f3; color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; align-self: flex-end; margin-bottom: 2px;
       transition: background 0.15s, transform 0.1s;
     }
     #send-btn:hover:not(:disabled) { background: #0058c4; }
@@ -130,33 +118,21 @@
     #send-btn:disabled { background: #c8c8c8; cursor: not-allowed; }
     #send-btn svg { width: 17px; height: 17px; }
 
+    /* ── Empty state ─────────────────────────────────────────────────────── */
     #empty-state {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      color: #8c9299;
-      user-select: none;
-      pointer-events: none;
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem; color: #8c9299; user-select: none; pointer-events: none;
     }
     #empty-state svg { opacity: 0.25; }
-    #empty-state p { font-size: 0.95rem; }
+    #empty-state p   { font-size: 0.95rem; }
     #empty-state.hidden { display: none; }
 
-
-      display: flex;
-      gap: 4px;
-      align-items: center;
-      padding: 0.75rem 1.25rem;
+    /* ── Typing indicator ────────────────────────────────────────────────── */
+    .typing-indicator .bubble {
+      display: flex; gap: 4px; align-items: center; padding: 0.75rem 1.25rem;
     }
-
-    .dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: #aaa;
-      animation: bounce 1.2s infinite;
-    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #aaa; animation: bounce 1.2s infinite; }
     .dot:nth-child(2) { animation-delay: 0.2s; }
     .dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes bounce {
@@ -167,7 +143,12 @@
 </head>
 <body>
 
-<ui5-shellbar id="shellbar" primary-title="SAP AI Core Demo" secondary-title="GPT-4o via Generative AI Hub"></ui5-shellbar>
+<header id="shellbar">
+  <img id="shellbar-logo" src="/ai_icon.svg" alt="AI Core" />
+  <div id="shellbar-divider"></div>
+  <span id="shellbar-title">SAP AI Core Demo</span>
+  <span id="shellbar-subtitle">A simple webapp consuming BTP AI Core services</span>
+</header>
 
 <div id="chat-container">
   <div id="messages">
@@ -180,11 +161,7 @@
   </div>
 
   <div id="input-row">
-    <textarea
-      id="prompt-input"
-      placeholder="Ask something…"
-      rows="1"
-    ></textarea>
+    <textarea id="prompt-input" placeholder="Ask something…" rows="1"></textarea>
     <button id="send-btn" aria-label="Send">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -196,14 +173,14 @@
 
 <script type="module">
   const messagesEl = document.getElementById('messages');
-  const inputEl = document.getElementById('prompt-input');
-  const sendBtn = document.getElementById('send-btn');
+  const inputEl    = document.getElementById('prompt-input');
+  const sendBtn    = document.getElementById('send-btn');
   const emptyState = document.getElementById('empty-state');
-  const shellbar = document.getElementById('shellbar');
+  const titleEl    = document.getElementById('shellbar-title');
 
   fetch('/api/config')
     .then(r => r.json())
-    .then(cfg => { if (cfg.title) shellbar.setAttribute('primary-title', cfg.title); })
+    .then(cfg => { if (cfg.title) titleEl.textContent = cfg.title; })
     .catch(() => {});
 
   const history = [
@@ -285,10 +262,7 @@
   sendBtn.addEventListener('click', send);
 
   inputEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      send();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
 
   inputEl.addEventListener('input', () => {
