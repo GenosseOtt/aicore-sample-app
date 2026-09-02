@@ -20,6 +20,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(express.json());
 app.use("/api", chatRouter);
+
+app.get("/api/config", (_req: Request, res: Response) => {
+  res.json({ title: process.env.APP_TITLE || "SAP AI Core Demo" });
+});
+
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.listen(port, () => {

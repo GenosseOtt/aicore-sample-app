@@ -167,7 +167,7 @@
 </head>
 <body>
 
-<ui5-shellbar primary-title="SAP AI Core Demo" secondary-title="GPT-4o via Generative AI Hub"></ui5-shellbar>
+<ui5-shellbar id="shellbar" primary-title="SAP AI Core Demo" secondary-title="GPT-4o via Generative AI Hub"></ui5-shellbar>
 
 <div id="chat-container">
   <div id="messages">
@@ -199,6 +199,12 @@
   const inputEl = document.getElementById('prompt-input');
   const sendBtn = document.getElementById('send-btn');
   const emptyState = document.getElementById('empty-state');
+  const shellbar = document.getElementById('shellbar');
+
+  fetch('/api/config')
+    .then(r => r.json())
+    .then(cfg => { if (cfg.title) shellbar.setAttribute('primary-title', cfg.title); })
+    .catch(() => {});
 
   const history = [
     { role: 'system', content: 'You are a helpful AI assistant.' }
