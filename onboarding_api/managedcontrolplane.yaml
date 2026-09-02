@@ -1,0 +1,45 @@
+apiVersion: core.openmcp.cloud/v1alpha1
+kind: ManagedControlPlane
+metadata:
+  labels:
+    openmcp.cloud.sap/charging-target: ""
+    openmcp.cloud.sap/charging-target-type: ""
+  name: live-controlplane
+  namespace: project-cpit-demo--ws-live-demo
+spec:
+  authentication:
+    enableSystemIdentityProvider: true
+  authorization:
+    roleBindings:
+      - role: admin
+        subjects:
+          - kind: User
+            name: openmcp:jan.saeck@sap.com
+      - role: admin
+        subjects:
+          - kind: User
+            name: openmcp:johannes.ott@sap.com
+      - role: admin
+        subjects:
+          - kind: User
+            name: openmcp:andreas.thaler01@sap.com
+      - role: admin
+        subjects:
+          - kind: User
+            name: openmcp:ingo.kober@sap.com
+  components:
+    apiServer:
+      type: GardenerDedicated
+    crossplane:
+      providers:
+        - name: provider-ai-core
+          version: 0.1.0
+        - name: btp
+          version: 1.5.0
+        - name: provider-kubernetes
+          version: 1.2.0
+      version: 1.20.1
+  desiredRegion:
+    direction: central
+    name: europe
+
